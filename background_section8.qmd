@@ -387,25 +387,31 @@ use_condaenv("<name>")
 
 ## Interfacing between languages
 
-### SingleCellExperiment
+### Import AnnData object
 
-After configuring Python, R commands can now be run using `reticulate`. First, the AnnData object is imported using `scanpy` (original package used by tutorial) or `squidpy`. This inovlves a download from exampledata.scverse.org
+After configuring Python, R commands can now be run using `reticulate`. First, the AnnData object is imported using `scanpy` (original package used by tutorial) or `squidpy`. This first involves a download from exampledata.scverse.org for the example dataset.
 
 ```{r}
 #| label: ad_from_squidpy
-py_run_string("
+py_run_string(
+  "
 import squidpy
 id = 'V1_Mouse_Brain_Sagittal_Posterior'
 ad = squidpy.datasets.visium(sample_id=id)
 ad.var_names_make_unique()
-")
+"
+)
+
+range(py$ad$obs$array_row)
 ```
 
 Note the above chunk downloads the data from exampledata.scverse.org. The `ad` object is an AnnData object, which is a Python object. The `reticulate` package allows us to access this object in R.
 
 The notebook cell form above (R code cell, py_run_string() command to issue Python code) seems much less troublesome to run from within a notebook than defining a Python code cell and allowing `reticulate` to run the code in a separate environment call that isn't verbose.
 
-The alternate format is given in the chunk below, which is set to `eval: false` by default.
+### Alternative format for Python / R chunks
+
+The alternate format is given in the chunks below, which is set to `eval: false` by default.
 
 ```{python}
 #| label: ad_from_squidpy
@@ -422,5 +428,114 @@ ad
 Back to R:
 
 ```{r}
+#| label: ad_from_squidpy_r_range
+#| eval: false
 range(py$ad$obs$array_row)
 ```
+
+### Convert AnnData in Python environment to SingleCellExperiment
+
+```{r}
+#| label: ad_to_sce
+(sce <- py$ad$as_SingleCellExperiment(x_mapping="counts"))
+```
+
+### Then convert SingleCellExperiment to AnnData within R
+
+```{r}
+#| label: sce_to_ad_in_R
+(ad <- as_AnnData(sce, x_mapping="counts"))
+```
+
+### SpatialExperiment interoperability
+
+Start with R to ingest a human breast cancer example dataset.
+
+```{r}
+#| label: breast_cancer_example
+id <- "Visium_HumanBreast_Janesick"
+pa <- OSTA.data_load(id)
+dir.create(td <- tempfile())
+unzip(pa, exdir = td)
+obj <- TENxVisium(
+    spacerangerOut=file.path(td, "outs"), 
+    format="h5", 
+    images="lowres")
+(spe <- VisiumIO::import(obj))
+```
+
+We also need to parse the original scaling information (i.e., scale factor) for spots and images available in the standard Visium output. We will use this later during conversion.
+
+```{r}
+#| label: breast_cancer_scale_factors
+fnm <- "scalefactors_json.json"
+fnm <- file.path(td, "outs", "spatial", fnm)
+sfs <- read_json(fnm)
+```
+
+We again use the `as_AnnData` function from `anndataR` in the previous example, and convert the `SingleCellExperiment`-relevant components of the `SpatialExperiment` object to an `AnnData` object.
+
+```{r}
+#| label: spe_to_ad
+mtx <- as(assay(spe), "dgCMatrix")
+assay(spe) <- mtx
+(ad <- as_AnnData(spe))
+```
+
+We can now populate the `uns` and `obsm` components of the `AnnData` object with spatial coordinates and images. The list of `uns` should be composed of as many samples as the images in the `SpatialExperiment` object. Also, each sample entry in the list should have two elements, one for the image and the other for the scaling information.
+
+```{r}
+#| label: populate_uns_obsm
+spatialCoordsNames(spe) <- c("x", "y")
+obsm <- list(spatial=spatialCoords(spe))
+
+# get image metadata
+imgdata <- imgData(spe)
+
+# get image
+img <- imgRaster(spe)
+img <- apply(img, c(1, 2), \(x) col2rgb(x))
+img <- aperm(img, perm=c(2, 3, 1))
+img <- img / 255
+
+# create uns
+uns <- list(images=list(lowres=img), scalefactors=sfs)
+uns <- list(spatial=setNames(list(uns), imgdata$sample_id))
+```
+
+Now let’s insert the components to the AnnData object, and write back to an .h5ad file.
+
+```{r}
+#| label: insert_components_to_AnnData
+ad$obs$library_id <- imgdata$sample_id
+ad$obsm <- obsm
+ad$uns <- uns
+# writes to a temporary working directory shared between R and Python
+# reticulate keeps them in sync
+ad$write_h5ad("spe.h5ad") 
+```
+
+Now that we have converted the `SpatialExperiment` object to AnnData format, we can run Python code per usual (e.g., continue analysis using `squidpy`). As a proof of concept, we here visualize an exemplary gene’s counts spatially.
+
+```{r}
+#| label: plot_spatial_counts_python_reticulate
+py_run_string(
+"
+import anndata
+import matplotlib
+import matplotlib.pyplot as plt
+
+ad = anndata.read_h5ad('spe.h5ad')
+ad.var_names = ad.var['Symbol'].astype(str)
+
+xy = ad.obsm['spatial']
+z = ad[:,'ERBB2'].layers['counts'].toarray()
+
+plt.scatter(xy[:,0], xy[:,1], c=z, s=5, cmap='turbo')
+plt.gca().set_aspect('equal')
+plt.title('ERBB2')
+plt.show()
+"
+)
+```
+
