@@ -30,39 +30,151 @@ library(SpatialExperiment)
 ```
 
 ## Python environment and `reticulate`
-
 The chunk below sets up a `reticulate` environment on-the-fly for use with this Quarto document. The environment is created in the current working directory, and will be named `OSTA`. The Python version 3.8.18 suggested by the tutorial had incompatibilities with Positron tools (2026-09). The package versions listed in the `req` vector are those that were used in the tutorial.
 
-Set to `eval: false` after the first run.
+**Note:** this was troublesome to set up in a Fedora Linux WSL2 environment, particularly with compiling Python. I updated the pinned packages to be compatible with Python 3.14, and pypi date-locked to 2026-07-05,and wrote a new chunk after this one. See [Updated Python environment creation](#updated-python-environment-creation) below and the `README.md` for this repo.
 
-**Note:** this was troublesome to set up in a Fedora Linux WSL2 environment, particularly with compiling Python. I updated the pinned packages to be compatible with Python 3.14.0.
+This original chunk is set to `eval: false` since it serves as reference only.
 
 ```{r}
 #| label: original_create_reticulate_env
 #| eval: false
-req <- c('access==1.1.9', 'affine==2.4.0', 'anndata==0.9.2', 'anndata2ri==1.3.1', 'attrs==23.1.0', 'backports.zoneinfo==0.2.1', 'beautifulsoup4==4.12.2', 'certifi==2023.11.17', 'cffi==1.16.0', 'charset-normalizer==3.3.2', 'click==8.1.7', 'click-plugins==1.1.1', 'cligj==0.7.2', 'commot==0.0.3', 'contourpy==1.1.1', 'cycler==0.12.1', 'decorator==4.4.2', 'deprecation==2.1.0', 'esda==2.4.3', 'fiona==1.9.5', 'fonttools==4.45.1', 'gensim==4.3.2', 'geopandas==0.13.2', 'get-annotations==0.1.2', 'giddy==2.3.4', 'h5py==3.10.0', 'idna==3.4', 'igraph==0.10.8', 'importlib-metadata==6.8.0', 'importlib-resources==6.1.1', 'inequality==1.0.0', 'Jinja2==3.1.2', 'joblib==1.3.2', 'karateclub==1.3.3', 'kiwisolver==1.4.5', 'leidenalg==0.10.1', 'Levenshtein==0.23.0', 'libpysal==4.7.0', 'llvmlite==0.41.1', 'mapclassify==2.6.0', 'MarkupSafe==2.1.3', 'matplotlib==3.7.4', 'mgwr==2.1.2', 'momepy==0.6.0', 'mpmath==1.3.0', 'natsort==8.4.0', 'networkx==2.6.3', 'numba==0.58.1', 'numpy==1.22.4', 'packaging==23.2', 'pandas==1.3.5', 'patsy==0.5.3', 'Pillow==10.1.0', 'platformdirs==4.0.0', 'plotly==5.18.0', 'pointpats==2.4.0', 'POT==0.9.1', 'PuLP==2.7.0', 'pycparser==2.21', 'pygeos==0.14', 'PyGSP==0.5.1', 'pynndescent==0.5.11', 'pyparsing==3.1.1', 'pyproj==3.5.0', 'pysal==23.7', 'python-dateutil==2.8.2', 'python-igraph==0.10.8', 'python-Levenshtein==0.23.0', 'python-louvain==0.16', 'pytz==2023.3.post1', 'quantecon==0.7.1', 'rapidfuzz==3.5.2', 'rasterio==1.3.9', 'rasterstats==0.19.0', 'requests==2.31.0', 'rpy2==3.5.14', 'Rtree==1.1.0', 'scanpy==1.9.6', 'scikit-learn==1.3.2', 'scipy==1.10.1', 'seaborn==0.12.2', 'segregation==2.5', 'session-info==1.0.0', 'setuptools==68.2.2', 'shapely==2.0.2', 'simplejson==3.19.2', 'six==1.16.0', 'smart-open==6.4.0', 'snuggs==1.4.7', 'soupsieve==2.5', 'spaghetti==1.7.4', 'spglm==1.0.8', 'spint==1.0.7', 'splot==1.1.5.post1', 'spopt==0.5.0', 'spreg==1.4', 'spvcm==0.3.0', 'statsmodels==0.14.0', 'stdlib-list==0.10.0', 'sympy==1.12', 'tenacity==8.2.3', 'texttable==1.7.0', 'threadpoolctl==3.2.0', 'tobler==0.9.0', 'tqdm==4.66.1', 'tzlocal==5.2', 'umap-learn==0.5.5', 'urllib3==2.1.0', 'zipp==3.17.0')
-install_python(version=ver <- "3.8.18")
-virtualenv_create(envname=env <- "OSTA", python=ver, packages=req) # this is created in ~/.virtualenvs/OSTA by default
+req <- c(
+  'access==1.1.9',
+  'affine==2.4.0',
+  'anndata==0.9.2',
+  'anndata2ri==1.3.1',
+  'attrs==23.1.0',
+  'backports.zoneinfo==0.2.1',
+  'beautifulsoup4==4.12.2',
+  'certifi==2023.11.17',
+  'cffi==1.16.0',
+  'charset-normalizer==3.3.2',
+  'click==8.1.7',
+  'click-plugins==1.1.1',
+  'cligj==0.7.2',
+  'commot==0.0.3',
+  'contourpy==1.1.1',
+  'cycler==0.12.1',
+  'decorator==4.4.2',
+  'deprecation==2.1.0',
+  'esda==2.4.3',
+  'fiona==1.9.5',
+  'fonttools==4.45.1',
+  'gensim==4.3.2',
+  'geopandas==0.13.2',
+  'get-annotations==0.1.2',
+  'giddy==2.3.4',
+  'h5py==3.10.0',
+  'idna==3.4',
+  'igraph==0.10.8',
+  'importlib-metadata==6.8.0',
+  'importlib-resources==6.1.1',
+  'inequality==1.0.0',
+  'Jinja2==3.1.2',
+  'joblib==1.3.2',
+  'karateclub==1.3.3',
+  'kiwisolver==1.4.5',
+  'leidenalg==0.10.1',
+  'Levenshtein==0.23.0',
+  'libpysal==4.7.0',
+  'llvmlite==0.41.1',
+  'mapclassify==2.6.0',
+  'MarkupSafe==2.1.3',
+  'matplotlib==3.7.4',
+  'mgwr==2.1.2',
+  'momepy==0.6.0',
+  'mpmath==1.3.0',
+  'natsort==8.4.0',
+  'networkx==2.6.3',
+  'numba==0.58.1',
+  'numpy==1.22.4',
+  'packaging==23.2',
+  'pandas==1.3.5',
+  'patsy==0.5.3',
+  'Pillow==10.1.0',
+  'platformdirs==4.0.0',
+  'plotly==5.18.0',
+  'pointpats==2.4.0',
+  'POT==0.9.1',
+  'PuLP==2.7.0',
+  'pycparser==2.21',
+  'pygeos==0.14',
+  'PyGSP==0.5.1',
+  'pynndescent==0.5.11',
+  'pyparsing==3.1.1',
+  'pyproj==3.5.0',
+  'pysal==23.7',
+  'python-dateutil==2.8.2',
+  'python-igraph==0.10.8',
+  'python-Levenshtein==0.23.0',
+  'python-louvain==0.16',
+  'pytz==2023.3.post1',
+  'quantecon==0.7.1',
+  'rapidfuzz==3.5.2',
+  'rasterio==1.3.9',
+  'rasterstats==0.19.0',
+  'requests==2.31.0',
+  'rpy2==3.5.14',
+  'Rtree==1.1.0',
+  'scanpy==1.9.6',
+  'scikit-learn==1.3.2',
+  'scipy==1.10.1',
+  'seaborn==0.12.2',
+  'segregation==2.5',
+  'session-info==1.0.0',
+  'setuptools==68.2.2',
+  'shapely==2.0.2',
+  'simplejson==3.19.2',
+  'six==1.16.0',
+  'smart-open==6.4.0',
+  'snuggs==1.4.7',
+  'soupsieve==2.5',
+  'spaghetti==1.7.4',
+  'spglm==1.0.8',
+  'spint==1.0.7',
+  'splot==1.1.5.post1',
+  'spopt==0.5.0',
+  'spreg==1.4',
+  'spvcm==0.3.0',
+  'statsmodels==0.14.0',
+  'stdlib-list==0.10.0',
+  'sympy==1.12',
+  'tenacity==8.2.3',
+  'texttable==1.7.0',
+  'threadpoolctl==3.2.0',
+  'tobler==0.9.0',
+  'tqdm==4.66.1',
+  'tzlocal==5.2',
+  'umap-learn==0.5.5',
+  'urllib3==2.1.0',
+  'zipp==3.17.0'
+)
+install_python(version = ver <- "3.8.18")
+virtualenv_create(envname = env <- "OSTA", python = ver, packages = req) # this is created in ~/.virtualenvs/OSTA by default
 ```
+
 ### Updated Python environment creation
 
-There is a Fedora packaging quirk — Fedora splits `pip` into a separate `python3-pip` package, and reticulate's `virtualenv_starter()` validation checks for a usable `pip`, not just `venv`, before considering an interpreter "suitable." The suggested fix: `sudo dnf install python3-pip`.
+For installation using Fedora Linux, there is a packaging quirk — Fedora splits `pip` into a separate `python3-pip` package, and reticulate's `virtualenv_starter()` validation checks for a usable `pip`, not just `venv`, before considering an interpreter "suitable." The suggested fix: `sudo dnf install python3-pip`.
 
 Fedora also ships Python's C headers (`Python.h`) in a separate `python3.14-devel` package. Without it, `pip install` fails to compile any package with native extensions — in this list, `rpy2`, `fiona`, and (unrelatedly, see below) `gensim`. Fix: `sudo dnf install python3.14-devel`. Note that reticulate's own error message for a failed `virtualenv_create()` is unhelpfully terse (it just lists every requested package as failed); to see the real pip error, reproduce with `python3.14 -m venv` + `pip install -r <file>` directly in a shell.
 
-`gensim==4.4.0` (the latest release on PyPI) does not build against Python 3.14's C API at all — its Cython-generated C code references CPython internals (`PyLongObject.ob_digit`, old `_PyLong_AsByteArray` signature) that were removed/changed in 3.10+. This is a genuine upstream incompatibility, independent of environment setup. `gensim` was only pulled in transitively via `karateclub` (used by `commot`, for cell-cell communication analysis), which isn't otherwise used in this document, so `commot`, `gensim`, and `karateclub` are dropped from `req_current` below.
+**Note on specific packages:** `gensim==4.4.0` (the latest release on PyPI) does not build against Python 3.14's C API at all — its Cython-generated C code references CPython internals (`PyLongObject.ob_digit`, old `_PyLong_AsByteArray` signature) that were removed/changed in 3.10+. This is a genuine upstream incompatibility, independent of environment setup. `gensim` was only pulled in transitively via `karateclub` (used by `commot`, for cell-cell communication analysis), which isn't otherwise used in this document, so `commot`, `gensim`, and `karateclub` are dropped from `req_current` below.
 
-`ipykernel` must be installed **inside** the target virtualenv, not left for Positron's bundled fallback. When a Python interpreter selected in Positron lacks its own `ipykernel`, Positron's Python extension falls back to a minimal `ipykernel` support bundle it ships internally (including its own, older `typing_extensions.py`), and prepends that path onto `sys.path`. If the venv's real `typing_extensions` is newer than the bundled one, this substitution breaks packages that rely on newer `typing_extensions` features — e.g. `import scanpy` failed here with `ImportError: cannot import name 'sentinel' from 'typing_extensions'` (via `anndata`), because Positron's bundled `typing_extensions.py` predates `typing_extensions.sentinel` and was silently shadowing the venv's own copy. Fix: add `ipykernel` to `req_current` (done below) so the venv has its own kernel support and Positron doesn't need to substitute anything.
+For Positron (2026-09 versions), `ipykernel` must be installed **inside** the target virtualenv, not left for Positron's bundled fallback. When a Python interpreter selected in Positron lacks its own `ipykernel`, Positron's Python extension falls back to a minimal `ipykernel` support bundle it ships internally (including its own, older `typing_extensions.py`), and prepends that path onto `sys.path`. If the venv's real `typing_extensions` is newer than the bundled one, this substitution breaks packages that rely on newer `typing_extensions` features — e.g. `import scanpy` failed here with `ImportError: cannot import name 'sentinel' from 'typing_extensions'` (via `anndata`), because Positron's bundled `typing_extensions.py` predates `typing_extensions.sentinel` and was silently shadowing the venv's own copy. Fix: add `ipykernel` to `req_current` (done below) so the venv has its own kernel support and Positron doesn't need to substitute anything.
+
+Pinned packages were date-locked to 2026-07-05 via directions from Posit Public Package Manager.
 
 Set to `eval: false` after the first run.
 
 ```{r}
 #| label: create_reticulate_env_current
-#| eval: false
-# Pinned equivalents of `req`, targeting current (2026-09) releases that are
-# actually installable against Python 3.14.0, rather than the tutorial's
+#| eval: true
+# Pinned equivalents of `req`, targeting 2026-07-05 date-locked releases that are
+# actually installable against Python 3.14, rather than the tutorial's
 # original Python 3.8 pins. Versions below were captured from a successful
-# `pip install --dry-run` resolution against a Python 3.14.0 venv, so this
+# `pip install --dry-run` resolution against a Python 3.14 venv, so this
 # combination of pins is known to resolve without conflicts.
 # `backports.zoneinfo` is dropped: it only backports the stdlib `zoneinfo`
 # module for Python <3.9 and is unbuildable/unneeded on modern CPython.
@@ -80,14 +192,126 @@ Set to `eval: false` after the first run.
 # wheels, and reticulate correctly detects and converts arrays from it;
 # verified end-to-end with `range(py$ad$obs$array_row)` succeeding directly
 # (no `$tolist()` workaround needed).
-req_current <- c('access==1.1.10.post3', 'affine==3.0.1', 'anndata==0.13.3.post0', 'anndata2ri==2.0.1', 'attrs==26.1.0', 'beautifulsoup4==4.15.0', 'certifi==2026.7.22', 'cffi==2.1.1', 'charset-normalizer==3.5.1', 'click==8.5.0', 'click-plugins==1.1.1.2', 'cligj==0.7.2', 'contourpy==1.3.3', 'cycler==0.12.1', 'decorator==4.4.2', 'deprecation==2.1.0', 'esda==2.10.0', 'fiona==1.10.1', 'fonttools==4.64.0', 'geopandas==1.1.4', 'get-annotations==0.1.2', 'giddy==2.3.9', 'h5py==3.16.0', 'idna==3.19', 'igraph==1.0.0', 'importlib-metadata==9.0.1', 'importlib-resources==7.1.0', 'inequality==1.1.2', 'Jinja2==3.1.6', 'joblib==1.6.0', 'kiwisolver==1.5.1', 'leidenalg==0.12.0', 'Levenshtein==0.27.4', 'libpysal==4.15.0', 'llvmlite==0.49.0', 'mapclassify==2.11.0', 'MarkupSafe==3.0.3', 'matplotlib==3.11.1', 'mgwr==2.2.1', 'momepy==1.0.0', 'mpmath==1.3.0', 'natsort==8.4.0', 'networkx==3.6.1', 'numba==0.67.0', 'numpy==2.3.5', 'packaging==26.3', 'pandas==3.0.5', 'patsy==1.0.3', 'Pillow==12.3.0', 'platformdirs==4.11.7', 'plotly==7.0.0', 'pointpats==2.6.0', 'POT==0.9.7.post1', 'PuLP==3.3.2', 'pycparser==3.0', 'PyGSP==0.6.1', 'pynndescent==0.6.0', 'pyparsing==3.3.2', 'pyproj==3.8.0', 'pysal==26.7', 'python-dateutil==2.9.0.post0', 'python-igraph==1.0.0', 'python-Levenshtein==0.27.4', 'python-louvain==0.16', 'pytz==2026.3.post1', 'quantecon==0.11.4', 'rapidfuzz==3.14.6', 'rasterio==1.5.1', 'rasterstats==0.21.0', 'requests==2.34.2', 'rpy2==3.6.7', 'Rtree==1.4.1', 'scanpy==1.12.4', 'scikit-learn==1.9.0', 'scipy==1.18.1', 'seaborn==0.13.2', 'segregation==2.5.5', 'session-info==1.0.1', 'setuptools==84.0.0', 'shapely==2.1.2', 'simplejson==4.1.2', 'six==1.17.0', 'smart-open==8.0.1', 'snuggs==1.4.7', 'soupsieve==2.9.2', 'spaghetti==1.7.6', 'spglm==1.1.0', 'spint==1.1.0', 'splot==1.1.7', 'spopt==0.7.0', 'spreg==1.9.1', 'spvcm==0.3.0', 'statsmodels==0.15.0', 'stdlib-list==0.12.0', 'sympy==1.14.0', 'tenacity==9.1.4', 'texttable==1.7.0', 'threadpoolctl==3.6.0', 'tobler==0.14.0', 'tqdm==4.70.0', 'tzlocal==5.4.4', 'umap-learn==0.5.12', 'urllib3==2.7.0', 'zipp==4.1.0', 'ipykernel', 'squidpy==1.8.3')
+req_current <- c(
+  'access==1.1.10.post3',
+  'affine==2.4.0',
+  'anndata==0.12.9',
+  'anndata2ri==2.0',
+  'attrs==26.1.0',
+  'beautifulsoup4==4.15.0',
+  'certifi==2026.6.17',
+  'cffi==2.0.0',
+  'charset-normalizer==3.4.7',
+  'click==8.4.2',
+  'click-plugins==1.1.1.2',
+  'cligj==0.7.2',
+  'contourpy==1.3.3',
+  'cycler==0.12.1',
+  'decorator==4.4.2',
+  'deprecation==2.1.0',
+  'esda==2.8.2',
+  'fiona==1.10.1',
+  'fonttools==4.63.0',
+  'geopandas==1.1.4',
+  'get-annotations==0.1.2',
+  'giddy==2.3.8',
+  'h5py==3.16.0',
+  'idna==3.18',
+  'igraph==1.0.0',
+  'importlib-metadata==9.0.0',
+  'importlib-resources==7.1.0',
+  'inequality==1.1.2',
+  'Jinja2==3.1.6',
+  'joblib==1.5.3',
+  'kiwisolver==1.5.0',
+  'leidenalg==0.12.0',
+  'Levenshtein==0.27.3',
+  'libpysal==4.15.0',
+  'llvmlite==0.48.0',
+  'mapclassify==2.10.0',
+  'MarkupSafe==3.0.3',
+  'matplotlib==3.10.9',
+  'mgwr==2.2.1',
+  'momepy==1.0.0',
+  'mpmath==1.3.0',
+  'natsort==8.4.0',
+  'networkx==3.6.1',
+  'numba==0.66.0',
+  'numpy==2.3.5',
+  'packaging==26.2',
+  'pandas==2.3.3',
+  'patsy==1.0.2',
+  'Pillow==12.3.0',
+  'platformdirs==4.10.0',
+  'plotly==6.8.0',
+  'pointpats==2.6.0',
+  'POT==0.9.6.post1',
+  'PuLP==3.3.2',
+  'pycparser==3.0',
+  'PyGSP==0.6.1',
+  'pynndescent==0.6.0',
+  'pyparsing==3.3.2',
+  'pyproj==3.7.2',
+  'pysal==26.1',
+  'python-dateutil==2.9.0.post0',
+  'python-igraph==1.0.0',
+  'python-Levenshtein==0.27.3',
+  'python-louvain==0.16',
+  'pytz==2026.2',
+  'quantecon==0.11.2',
+  'rapidfuzz==3.14.5',
+  'rasterio==1.5.0',
+  'rasterstats==0.21.0',
+  'requests==2.34.2',
+  'rpy2==3.6.7',
+  'Rtree==1.4.1',
+  'scanpy==1.12.2',
+  'scikit-learn==1.9.0',
+  'scipy==1.18.0',
+  'seaborn==0.13.2',
+  'segregation==2.5.5',
+  'session-info==1.0.1',
+  'setuptools==83.0.0',
+  'shapely==2.1.2',
+  'simplejson==4.1.1',
+  'six==1.17.0',
+  'smart-open==8.0.0',
+  'snuggs==1.4.7',
+  'soupsieve==2.8.4',
+  'spaghetti==1.7.6',
+  'spglm==1.1.0',
+  'spint==1.1.0',
+  'splot==1.1.7',
+  'spopt==0.7.0',
+  'spreg==1.9.0',
+  'spvcm==0.3.0',
+  'squidpy==1.8.3',
+  'statsmodels==0.14.6',
+  'stdlib-list==0.12.0',
+  'sympy==1.14.0',
+  'tenacity==9.1.4',
+  'texttable==1.7.0',
+  'threadpoolctl==3.6.0',
+  'tobler==0.14.0',
+  'tqdm==4.68.3',
+  'tzlocal==5.4.4',
+  'umap-learn==0.5.12',
+  'urllib3==2.7.0',
+  'zipp==4.1.0',
+  'ipykernel==7.3.0',
+  'ipywidgets==8.2.4'
+)
 # # Resolve the path to an existing Python 3.14 interpreter on this machine
 # rather than hardcoding a path, so reticulate/pyenv does not attempt to
 # download and build a separate copy, and so this resolves portably on
 # other machines with a system Python 3.14 already installed.
-virtualenv_create(envname=env_current <- "OSTA_current", python=ver_current <- virtualenv_starter("3.14"), packages=req_current)
+virtualenv_create(
+  envname = env_current <- "OSTA_current",
+  python = ver_current <- virtualenv_starter("3.14"),
+  packages = req_current
+)
 
-# Positron quirk workaround (see AGENTS.md item 6): Positron always injects
+# Positron quirk workaround (see AGENTS.md): Positron always injects
 # PYTHONPATH entries pointing at its own bundled ipykernel support libraries
 # ahead of this venv's own site-packages, which can shadow newer packages
 # (e.g. an older bundled `typing_extensions.py` missing `sentinel`, breaking
@@ -97,36 +321,43 @@ virtualenv_create(envname=env_current <- "OSTA_current", python=ver_current <- v
 # repo), so it must be (re-)written any time the venv is (re-)created --
 # hence doing it here, immediately after `virtualenv_create()`.
 venv_python <- virtualenv_python(env_current)
-site_packages <- system2(venv_python, c("-c", shQuote("import sysconfig; print(sysconfig.get_path('purelib'))")), stdout=TRUE)
+site_packages <- system2(
+  venv_python,
+  c("-c", shQuote("import sysconfig; print(sysconfig.get_path('purelib'))")),
+  stdout = TRUE
+)
 sitecustomize_path <- file.path(site_packages, "sitecustomize.py")
-writeLines(c(
-  '"""',
-  "Workaround for a Positron/reticulate interaction: Positron's Python",
-  "extension always injects PYTHONPATH entries pointing at its own bundled",
-  "ipykernel support libraries, placed ahead of this virtualenv's own",
-  "site-packages on sys.path -- even when this venv has its own ipykernel",
-  "installed. Those bundled libraries can ship an older `typing_extensions.py`",
-  "missing symbols (e.g. `sentinel`) needed by newer packages such as",
-  "`anndata`, silently shadowing this venv's own, newer `typing_extensions`",
-  "install and breaking imports like `import scanpy`.",
-  "",
-  "Fix: move this venv's own site-packages directory to the front of",
-  "`sys.path`, so it takes priority over Positron's bundled fallback",
-  "libraries. See AGENTS.md in the OSTA_walkthroughs project for the full",
-  "quirk write-up. This file is regenerated by the",
-  "`create_reticulate_env_current` chunk in background_section8.qmd every",
-  "time the venv is (re-)created.",
-  '"""',
-  "",
-  "import sys",
-  "import os",
-  "",
-  "_venv_site_packages = os.path.dirname(os.path.abspath(__file__))",
-  "",
-  "if _venv_site_packages in sys.path:",
-  "    sys.path.remove(_venv_site_packages)",
-  "sys.path.insert(0, _venv_site_packages)"
-), sitecustomize_path)
+writeLines(
+  c(
+    '"""',
+    "Workaround for a Positron/reticulate interaction: Positron's Python",
+    "extension always injects PYTHONPATH entries pointing at its own bundled",
+    "ipykernel support libraries, placed ahead of this virtualenv's own",
+    "site-packages on sys.path -- even when this venv has its own ipykernel",
+    "installed. Those bundled libraries can ship an older `typing_extensions.py`",
+    "missing symbols (e.g. `sentinel`) needed by newer packages such as",
+    "`anndata`, silently shadowing this venv's own, newer `typing_extensions`",
+    "install and breaking imports like `import scanpy`.",
+    "",
+    "Fix: move this venv's own site-packages directory to the front of",
+    "`sys.path`, so it takes priority over Positron's bundled fallback",
+    "libraries. See AGENTS.md in the OSTA_walkthroughs project for the full",
+    "quirk write-up. This file is regenerated by the",
+    "`create_reticulate_env_current` chunk in background_section8.qmd every",
+    "time the venv is (re-)created.",
+    '"""',
+    "",
+    "import sys",
+    "import os",
+    "",
+    "_venv_site_packages = os.path.dirname(os.path.abspath(__file__))",
+    "",
+    "if _venv_site_packages in sys.path:",
+    "    sys.path.remove(_venv_site_packages)",
+    "sys.path.insert(0, _venv_site_packages)"
+  ),
+  sitecustomize_path
+)
 ```
 
 ### Use the previously created virtual environment
@@ -160,18 +391,35 @@ use_condaenv("<name>")
 
 After configuring Python, R commands can now be run using `reticulate`. First, the AnnData object is imported using `scanpy` (original package used by tutorial) or `squidpy`. This inovlves a download from exampledata.scverse.org
 
-```{python}
-#| label: import_anndata
-# import scanpy
+```{r}
+#| label: ad_from_squidpy
+py_run_string("
 import squidpy
+id = 'V1_Mouse_Brain_Sagittal_Posterior'
+ad = squidpy.datasets.visium(sample_id=id)
+ad.var_names_make_unique()
+")
+```
+
+Note the above chunk downloads the data from exampledata.scverse.org. The `ad` object is an AnnData object, which is a Python object. The `reticulate` package allows us to access this object in R.
+
+The notebook cell form above (R code cell, py_run_string() command to issue Python code) seems much less troublesome to run from within a notebook than defining a Python code cell and allowing `reticulate` to run the code in a separate environment call that isn't verbose.
+
+The alternate format is given in the chunk below, which is set to `eval: false` by default.
+
+```{python}
+#| label: ad_from_squidpy
+#| error: true
+#| eval: false
+import squidpy
+
 id = "V1_Mouse_Brain_Sagittal_Posterior"
-# ad = scanpy.datasets.visium_sge(sample_id=id) # this was the original tutorial command but 2026-09-06 deprecation notice recommend squidpy command below
 ad = squidpy.datasets.visium(sample_id=id)
 ad.var_names_make_unique()
 ad
 ```
 
-Back to R
+Back to R:
 
 ```{r}
 range(py$ad$obs$array_row)

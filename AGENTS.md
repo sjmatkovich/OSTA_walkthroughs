@@ -84,6 +84,27 @@ These have caused repeated `reticulate::virtualenv_create()` failures in
    The file still lives inside each environment (not tracked in this repo),
    but both setup paths now regenerate it as part of normal (re-)creation.
 
+7. **`req_current` pins must match the Posit Package Manager PyPI snapshot date.**
+   The `req_current` list in `background_section8.qmd` contains version pins
+   resolved against a specific snapshot date (`2026-07-08` as of this project's
+   setup). Packages released after that snapshot date (or updated to newer
+   versions in the snapshot) will not be found, causing
+   `reticulate::virtualenv_create()` to fail with an unhelpfully terse
+   "failed to install X, Y, Z..." message that doesn't distinguish real pip
+   errors from resolution failures (see quirk 3 above).
+   
+   When updating `req_current` for a newer Posit Package Manager snapshot or
+   live PyPI index, audit all pins by running:
+   ```bash
+   pip install --dry-run --no-deps --index-url https://packagemanager.posit.co/pypi/YYYY-MM-DD/simple \
+     --trusted-host packagemanager.posit.co -r <requirements_file.txt>
+   ```
+   This checks each package individually against the target index without
+   cross-package dependency cascade failures. Any failing package should be
+   downgraded to the latest version present in the snapshot. The snapshot
+   date can be found in `~/.Rprofile` (the `repos` option CRAN URL contains it)
+   or by running `pip config list` in a shell (the `global.index-url` shows it).
+
 ## Key files
 
 - **`background_section8.qmd`**: Quarto doc demonstrating R/Python

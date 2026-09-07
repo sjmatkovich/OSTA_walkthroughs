@@ -8,5 +8,13 @@
     // is installed fine there) -- it's Positron's own kernel bootstrapping
     // that fails. Quarto's {python} chunks work fine via reticulate's normal
     // engine without this managed console, so disabling it avoids the error.
-    "positron.reticulate.enabled": "never"
+    "positron.reticulate.enabled": "never",
+    "[r]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Posit.air-vscode"
+    },
+    "[quarto]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "quarto.quarto"
+    }
 }
