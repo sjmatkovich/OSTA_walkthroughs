@@ -1,0 +1,23 @@
+{
+  "permission": {
+    "external_directory": {
+      "/tmp/*": "allow"
+    },
+    "bash": {
+      "echo *": "allow",
+      "cat *": "allow",
+      "ls *": "allow",
+      "find *": "allow",
+      "head *": "allow",
+      "apt *": "allow",
+      "grep *": "allow",
+      "bash *": "allow",
+      "tee *": "allow",
+      "conda run *": "allow",
+      "tail *": "allow"
+    },
+    "edit": {
+      "*.sh": "allow"
+    }
+  }
+}

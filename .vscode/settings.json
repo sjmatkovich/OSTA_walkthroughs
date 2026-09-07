@@ -1,0 +1,12 @@
+{
+    // Disable Positron's automatic "Python (reticulate)" companion console.
+    // Positron currently has a known bug (posit-dev/positron#14907, #11682,
+    // #8452) where it fails to inject its bundled `positron_ipykernel`
+    // package into the reticulate-managed Python session, causing:
+    //   ModuleNotFoundError: No module named 'positron_ipykernel'
+    // This is unrelated to the target virtualenv/conda env itself (ipykernel
+    // is installed fine there) -- it's Positron's own kernel bootstrapping
+    // that fails. Quarto's {python} chunks work fine via reticulate's normal
+    // engine without this managed console, so disabling it avoids the error.
+    "positron.reticulate.enabled": "never"
+}
