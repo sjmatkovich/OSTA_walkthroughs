@@ -2,7 +2,7 @@
 
 ## Environment: Fedora Linux 43 (WSL2) Python quirks
 
-This machine runs Fedora Linux 43 under WSL2. Fedora splits several things out of
+For machines running Fedora Linux 43 under WSL2. Fedora splits several things out of
 the base Python package that are bundled together on most other distros/platforms.
 These have caused repeated `reticulate::virtualenv_create()` failures in
 `background_section8.qmd`:
@@ -44,7 +44,12 @@ These have caused repeated `reticulate::virtualenv_create()` failures in
    - `pygeos`: functionality merged into `shapely>=2.0` years ago; the
      standalone package no longer builds against current Python/setuptools.
 
-6. **Positron always injects its own bundled `ipykernel` support libraries
+## Environment: Positron and reticulate quirks
+
+The information below referring to `ipykernel` support and `reticulate` in
+Positron was relevant in 2026-09.
+
+1. **Positron always injects its own bundled `ipykernel` support libraries
    onto `PYTHONPATH`, ahead of the target venv's own site-packages — even
    when the venv has its own `ipykernel` installed.** Every Python console
    session Positron starts sets `PYTHONPATH` to point at
@@ -84,7 +89,9 @@ These have caused repeated `reticulate::virtualenv_create()` failures in
    The file still lives inside each environment (not tracked in this repo),
    but both setup paths now regenerate it as part of normal (re-)creation.
 
-7. **`req_current` pins must match the Posit Package Manager PyPI snapshot date.**
+## Environment: reticulate::virtualenv_create() and PyPI snapshot date
+
+1. **`req_current` pins must match the Posit Package Manager PyPI snapshot date.**
    The `req_current` list in `background_section8.qmd` contains version pins
    resolved against a specific snapshot date (`2026-07-08` as of this project's
    setup). Packages released after that snapshot date (or updated to newer
