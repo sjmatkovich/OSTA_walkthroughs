@@ -169,7 +169,7 @@ Pinned packages were date-locked to 2026-07-05 via directions from Posit Public 
 Set to `eval: false` after the first run.
 
 ```{r}
-#| label: create_reticulate_env_current
+#| label: create_env_current_req_list
 #| eval: true
 # Pinned equivalents of `req`, targeting 2026-07-05 date-locked releases that are
 # actually installable against Python 3.14, rather than the tutorial's
@@ -301,6 +301,15 @@ req_current <- c(
   'ipykernel==7.3.0',
   'ipywidgets==8.2.4'
 )
+```
+
+### Install the pinned packages and environment with existing Python 3.14 interpreter
+
+Set to `eval: false` by default.
+
+```{r}
+#| label: create_env_existing_interpreter
+#| eval: false
 # # Resolve the path to an existing Python 3.14 interpreter on this machine
 # rather than hardcoding a path, so reticulate/pyenv does not attempt to
 # download and build a separate copy, and so this resolves portably on
@@ -310,10 +319,18 @@ virtualenv_create(
   python = ver_current <- virtualenv_starter("3.14"),
   packages = req_current
 )
+```
 
+### Fix quirk with `reticulate` venv environments and Positron
+
+Set to `eval: false` by default.
+
+```{r}
+#| label: positron_reticulate_quirk_workaround
+#| #| eval: false
 # Positron quirk workaround (see AGENTS.md): Positron always injects
 # PYTHONPATH entries pointing at its own bundled ipykernel support libraries
-# ahead of this venv's own site-packages, which can shadow newer packages
+# ahead of a venv's own site-packages, which can shadow newer packages
 # (e.g. an older bundled `typing_extensions.py` missing `sentinel`, breaking
 # `import scanpy`/`anndata`). A `sitecustomize.py` dropped into this venv's
 # site-packages re-prioritizes the venv's own packages at interpreter
@@ -360,10 +377,24 @@ writeLines(
 )
 ```
 
+### Installed pinned packages and environment using Python copy installed by `reticulate::install_python()`
+
+```{r}
+#| label: create_env_reticulate_install_python
+#| eval: true
+version <- "3.14.4"
+install_python(version = version)
+virtualenv_create(
+  envname = env_current <- "OSTA_current",
+  version = version,
+  packages = req_current
+)
+```
+
 ### Use the previously created virtual environment
 ```{r}
 #| eval: true
-use_virtualenv("OSTA_current", required=TRUE)
+use_virtualenv("OSTA_current", required = TRUE)
 ```
 
 ## Alternative: use conda
@@ -379,8 +410,8 @@ Set as `eval: false` by default
 #| eval: false
 
 # path to Conda binary
-bin <- ".../bin/conda" 
-options(reticulate.conda_binary=bin)
+bin <- ".../bin/conda"
+options(reticulate.conda_binary = bin)
 # activate environment
 use_condaenv("<name>")
 ```
@@ -437,14 +468,14 @@ range(py$ad$obs$array_row)
 
 ```{r}
 #| label: ad_to_sce
-(sce <- py$ad$as_SingleCellExperiment(x_mapping="counts"))
+(sce <- py$ad$as_SingleCellExperiment(x_mapping = "counts"))
 ```
 
 ### Then convert SingleCellExperiment to AnnData within R
 
 ```{r}
 #| label: sce_to_ad_in_R
-(ad <- as_AnnData(sce, x_mapping="counts"))
+(ad <- as_AnnData(sce, x_mapping = "counts"))
 ```
 
 ### SpatialExperiment interoperability
@@ -458,9 +489,10 @@ pa <- OSTA.data_load(id)
 dir.create(td <- tempfile())
 unzip(pa, exdir = td)
 obj <- TENxVisium(
-    spacerangerOut=file.path(td, "outs"), 
-    format="h5", 
-    images="lowres")
+  spacerangerOut = file.path(td, "outs"),
+  format = "h5",
+  images = "lowres"
+)
 (spe <- VisiumIO::import(obj))
 ```
 
@@ -487,7 +519,7 @@ We can now populate the `uns` and `obsm` components of the `AnnData` object with
 ```{r}
 #| label: populate_uns_obsm
 spatialCoordsNames(spe) <- c("x", "y")
-obsm <- list(spatial=spatialCoords(spe))
+obsm <- list(spatial = spatialCoords(spe))
 
 # get image metadata
 imgdata <- imgData(spe)
@@ -495,12 +527,12 @@ imgdata <- imgData(spe)
 # get image
 img <- imgRaster(spe)
 img <- apply(img, c(1, 2), \(x) col2rgb(x))
-img <- aperm(img, perm=c(2, 3, 1))
+img <- aperm(img, perm = c(2, 3, 1))
 img <- img / 255
 
 # create uns
-uns <- list(images=list(lowres=img), scalefactors=sfs)
-uns <- list(spatial=setNames(list(uns), imgdata$sample_id))
+uns <- list(images = list(lowres = img), scalefactors = sfs)
+uns <- list(spatial = setNames(list(uns), imgdata$sample_id))
 ```
 
 Now let’s insert the components to the AnnData object, and write back to an .h5ad file.
@@ -512,7 +544,7 @@ ad$obsm <- obsm
 ad$uns <- uns
 # writes to a temporary working directory shared between R and Python
 # reticulate keeps them in sync
-ad$write_h5ad("spe.h5ad") 
+ad$write_h5ad("spe.h5ad")
 ```
 
 Now that we have converted the `SpatialExperiment` object to AnnData format, we can run Python code per usual (e.g., continue analysis using `squidpy`). As a proof of concept, we here visualize an exemplary gene’s counts spatially.
@@ -520,7 +552,7 @@ Now that we have converted the `SpatialExperiment` object to AnnData format, we 
 ```{r}
 #| label: plot_spatial_counts_python_reticulate
 py_run_string(
-"
+  "
 import anndata
 import matplotlib
 import matplotlib.pyplot as plt

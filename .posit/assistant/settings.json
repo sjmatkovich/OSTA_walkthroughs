@@ -14,7 +14,11 @@
       "bash *": "allow",
       "tee *": "allow",
       "conda run *": "allow",
-      "tail *": "allow"
+      "tail *": "allow",
+      "R *": "allow",
+      "which *": "allow",
+      "cd *": "allow",
+      "Rscript *": "allow"
     },
     "edit": {
       "*.sh": "allow"
