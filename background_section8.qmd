@@ -397,9 +397,9 @@ use_virtualenv("OSTA_current", required = TRUE)
 
 ## Alternative: use conda
 
-In addition, I constructed a conda environment route (2026-09). There is a setup script in this repository `setup_osta_env.sh` for this purpose.
+In addition, I constructed a conda environment route (2026-09). There is a setup script in this repository `./setup_conda_env/setup_osta_env.sh` for this purpose with an accompanying `requirements.txt`.
 
-As of 2026-09-06 this may require additional work to achieve parity with the virtualenv route, due to extensive work necessary to make Positron operate correctly with the virtual environment after the conda script was created.
+As of 2026-09-06 this may require additional work to achieve parity with the virtualenv route, especially `requirements.txt`, due to extensive work necessary to make Positron operate correctly with the virtual environment after the conda script was created.
 
 Set as `eval: false` by default
 
